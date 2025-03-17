@@ -1,0 +1,50 @@
+1º - entender a planilha do excel.
+2° - buscar automatização da tabela da esteira e as da direita
+3° - entrar, baixar, consolidar os arquivos baixados com o arquivo ja existente.
+	- entrar
+		- link do site
+		- identificar campos de login (inspecionar pegar o ID do campo ou algo que se refere ao campo especifo)
+		- xpath (//tag[@atributo="valor]) ex: //input[@id="valor_do_id]
+		- xpath real: USUARIO ->  //input[@id='mat-input-26']
+			      SENHA -> //input[@id='mat-input-27']
+			      BOTÃO -> //button[@class='']
+
+		- Automatizar entrada de dados e click no login
+		- INSTALAR O SELENIUM (pip install selenium
+	- capturar data de periodo de pesquisa
+		- identificar os campos de input de data
+		- encontrar elementos unicos deste input (id, class unica, nome...)
+		- input data inicio: - xpath (//tag[@atributo="valor]) ex: //input[@id='mat-input-30']
+		- input data final: xpath (//tag[@atributo="valor]) ex: //input[@id='mat-input-31']
+		BOTÃO -> //button[@class='mat-focus-indicator ng-tns-c233-107 mat-raised-button mat-button-base mat-accent']
+	
+	- expandir campo de seleção de download
+	1° campo - //div[@id='mat-select-value-97']
+
+
+caminhos para a automação
+1° - abrir navageador
+2° - acessar ms gestor
+3° - setar os meses de consulta (mês atual - 1 (mês anterior))
+
+
+Ferramentas
+- Python
+	- Pandas
+	- openpyxl
+	- OS
+	- talvez (matplotlib)
+
+
+
+
+MS GESTOR
+https://msgestor.msconnect.com.br/pages/auth/login
+LOGIN - allef.sousa
+SENHA - 98638C3
+
+
+vendedorLoja = tabela_vendas[["data_criacao","Contrato","TIPO","vendedor", "Valor"]].groupby("vendedor").sum().nlargest(3, "Valor")
+print(vendedorLoja)
+
+pyxlsb
