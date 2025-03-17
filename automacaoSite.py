@@ -15,7 +15,7 @@ import tempfile
 
 
 
-download_dir = "M:\\ADM DE VENDAS PJ\\Diario Imput\\testeDeDownload\\arquivos baixados"
+download_dir = "M:\\ADM DE VENDAS PJ\\Diario Imput\\DownloadArquivos\\arquivos baixados"
 chrome_options = Options()
 chrome_options.add_argument("--start-maximized")  # Para abrir o navegador maximizado
 
@@ -260,7 +260,7 @@ finally:
 sleep(5)
 
 # Caminho da pasta onde os arquivos Excel estão localizados
-diretorio = "M:\\ADM DE VENDAS PJ\\Diario Imput\\testeDeDownload\\arquivos baixados"
+diretorio = "M:\\ADM DE VENDAS PJ\\Diario Imput\\DownloadArquivos\\arquivos baixados"
 
 # Lista todos os arquivos da pasta
 arquivos = [f for f in os.listdir(diretorio) if f.endswith('.xlsx')]
@@ -280,7 +280,7 @@ for arquivo in arquivos:
 # Concatena todos os DataFrames da lista
 df_final = pd.concat(lista_dfs, ignore_index=True, join="outer")
 
-caminho_salvar = "M:\\ADM DE VENDAS PJ\\Diario Imput\\testeDeDownload\\arquivo_unificado.xlsx"
+caminho_salvar = "M:\\ADM DE VENDAS PJ\\Diario Imput\\DownloadArquivos\\arquivo_unificado.xlsx"
 
 # Salva o DataFrame final em um novo arquivo Excel no caminho especificado
 df_final.to_excel(caminho_salvar, index=False)
@@ -301,14 +301,14 @@ for arquivo in arquivos:
 sleep(5)
 
 # Caminho para o arquivo unificado
-arquivo_unificado = "M:\\ADM DE VENDAS PJ\\Diario Imput\\testeDeDownload\\arquivo_unificado.xlsx"
+arquivo_unificado = "M:\\ADM DE VENDAS PJ\\Diario Imput\\DownloadArquivos\\arquivo_unificado.xlsx"
 
 # Caminho para o arquivo de destino (o que você vai substituir)
-arquivo_destino = "M:\\ADM DE VENDAS PJ\\Diario Imput\\testeDeDownload\\DIARIO INPUT V.37.xlsb"
+arquivo_destino = "M:\\ADM DE VENDAS PJ\\Diario Imput\\planilhaTeste\\DIARIO IMPUT V.37.xlsb"
 
 # Cria uma pasta temporária única para o usuário
 pasta_temp = tempfile.mkdtemp()  # Cria uma pasta temporária única
-arquivo_local = os.path.join(pasta_temp, "DIARIO INPUT V.37.xlsb")  # Caminho do arquivo temporário
+arquivo_local = os.path.join(pasta_temp, "DIARIO IMPUT V.37.xlsb")  # Caminho do arquivo temporário
 
 # Copia o arquivo da rede para a pasta local
 try:
