@@ -18,6 +18,7 @@ chrome_options = Options()
 chrome_options.add_argument("--start-maximized")  # Para abrir o navegador maximizado
 
 download_dir = input(r"Insira o caminho onde sera feito o download dos 3 arquivos: ")
+print('Caminho inserido com sucesso! Por favor aguarde!')
 prefs = {
     "profile.default_content_settings.popups": 0,  # Bloqueia popups de confirmação
     "download.default_directory": download_dir,  # Diretório de
@@ -272,6 +273,7 @@ df_final = pd.concat(lista_dfs, ignore_index=True, join="outer")
 
 nome_arquivo = "arquivo_consolidado.xlsx"
 caminho = input(r"Insira aqui o caminho para salvar o arquivo consolidado: ")
+print('Caminho inserido com sucesso! Por favor aguarde!')
 
 caminho_salvar = caminho+"\\"+nome_arquivo
 
@@ -298,9 +300,9 @@ arquivo_unificado = caminho_salvar
 
 # Caminho para o arquivo de destino (o que você vai substituir)
 nome_arquivo = "DIARIO IMPUT V.37.xlsb"
-destino_arquivo = input(rf"Digite o caminho do arquivo: "  )
+destino_arquivo = input(rf"Digite o caminho do arquivo DIARIO IMPUT: "  )
 arquivo_destino = destino_arquivo+"\\"+nome_arquivo
-
+print('Caminho inserido com sucesso! Por favor aguarde!')
 #arquivo_destino = "M:\\ADM DE VENDAS PJ\\Diario Imput\\planilhaTeste\\DIARIO IMPUT V.37.xlsb"
 
 # Cria uma pasta temporária única para o
