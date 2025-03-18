@@ -18,6 +18,7 @@ chrome_options = Options()
 chrome_options.add_argument("--start-maximized")  # Para abrir o navegador maximizado
 
 download_dir = input(r"Insira o caminho onde sera feito o download dos 3 arquivos: ")
+print('')
 print('Caminho inserido com sucesso! Por favor aguarde!')
 prefs = {
     "profile.default_content_settings.popups": 0,  # Bloqueia popups de confirmação
@@ -140,7 +141,9 @@ try:
     """)
 
     # A automação pode continuar sem ser bloqueada, você pode interagir com o site normalmente
+    print('')
     print("O popup foi exibido. Agora você pode preencher a data manualmente.")
+    print('')
 
     # Aguarda a remoção do popup (ou até você clicar em OK)
     WebDriverWait(driver, 300).until(
@@ -148,7 +151,9 @@ try:
     )
 
     # Após você clicar em OK no popup, a automação continua
+    print('')
     print("Automação retomada após a seleção da data.")
+    print('')
 
     # Após o popup sair será gerado um click no botão "Aplicar e salvar filtros"
     sleep(1)
@@ -272,16 +277,20 @@ df_final = pd.concat(lista_dfs, ignore_index=True, join="outer")
 
 
 nome_arquivo = "arquivo_consolidado.xlsx"
+print('')
 caminho = input(r"Insira aqui o caminho para salvar o arquivo consolidado: ")
+print('')
 print('Caminho inserido com sucesso! Por favor aguarde!')
+print('')
 
 caminho_salvar = caminho+"\\"+nome_arquivo
 
 # Salva o DataFrame final em um novo arquivo Excel no caminho especificado
 df_final.to_excel(caminho_salvar, index=False)
 
+print('')
 print("Arquivos unificados com colunas diferentes!")
-
+print('')
 sleep(10)
 
 # Exclui os arquivos originais
@@ -289,7 +298,9 @@ for arquivo in arquivos:
     caminho_arquivo = os.path.join(download_dir, arquivo)
     try:
         os.remove(caminho_arquivo)  # Apaga o arquivo
+        print('')
         print(f"Arquivo {arquivo} apagado com sucesso.")
+        print('')
     except Exception as e:
         print(f"Erro ao tentar apagar o arquivo {arquivo}: {e}")
 
@@ -299,10 +310,15 @@ sleep(5)
 arquivo_unificado = caminho_salvar
 
 # Caminho para o arquivo de destino (o que você vai substituir)
+print('')
 nome_arquivo = "DIARIO IMPUT V.37.xlsb"
 destino_arquivo = input(rf"Digite o caminho do arquivo DIARIO IMPUT: "  )
+print('')
+
 arquivo_destino = destino_arquivo+"\\"+nome_arquivo
+print('')
 print('Caminho inserido com sucesso! Por favor aguarde!')
+print('')
 #arquivo_destino = "M:\\ADM DE VENDAS PJ\\Diario Imput\\planilhaTeste\\DIARIO IMPUT V.37.xlsb"
 
 # Cria uma pasta temporária única para o
@@ -312,7 +328,9 @@ arquivo_local = os.path.join(pasta_temp, "DIARIO IMPUT V.37.xlsb")  # Caminho do
 # Copia o arquivo da rede para a pasta local
 try:
     shutil.copy(arquivo_destino, arquivo_local)
+    print('')
     print(f"Arquivo copiado para a pasta temporária: {arquivo_local}")
+    print('')
 except Exception as e:
     print(f"Erro ao copiar o arquivo da rede para local: {e}")
     exit()
@@ -348,7 +366,9 @@ try:
     wb_destino.save()
     wb_destino.close()
 
+    print('')
     print("Alterações feitas com sucesso!")
+    print('')
 except Exception as e:
     print(f"Erro ao tentar abrir o arquivo {arquivo_destino}: {e}")
 
@@ -356,7 +376,9 @@ except Exception as e:
 try:
     # Copia o arquivo modificado de volta para a rede
     shutil.copy(arquivo_local, arquivo_destino)
+    print('')
     print("Arquivo copiado de volta para a rede.")
+    print('')
 except Exception as e:
     print(f"Erro ao copiar o arquivo de volta para a rede: {e}")
     exit()
@@ -365,15 +387,19 @@ except Exception as e:
 try:
     os.remove(arquivo_local)
     os.rmdir(pasta_temp)
+    print('')
     print("Arquivo e pasta temporária removidos.")
+    print('')
 except Exception as e:
     print(f"Erro ao limpar arquivos temporários: {e}")
 
 # Exclui o arquivo unificado
 try:
     os.remove(arquivo_unificado)  # Apaga o arquivo unificado
+    print('')
     print(f"Arquivo {arquivo_unificado} apagado com sucesso.")
+    print('')
 except Exception as e:
     print(f"Erro ao tentar apagar o arquivo {arquivo_unificado}: {e}")
-
+print('')
 print("Dados substituídos com sucesso no arquivo de destino.")
