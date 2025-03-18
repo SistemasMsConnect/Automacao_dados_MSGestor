@@ -14,18 +14,18 @@ import tempfile
 
 
 
-
-download_dir = "M:\\ADM DE VENDAS PJ\\Diario Imput\\DownloadArquivos\\arquivos baixados"
 chrome_options = Options()
 chrome_options.add_argument("--start-maximized")  # Para abrir o navegador maximizado
 
+download_dir = input(r"Insira o caminho onde sera feito o download dos 3 arquivos: ")
 prefs = {
     "profile.default_content_settings.popups": 0,  # Bloqueia popups de confirmação
-    "download.default_directory": download_dir,  # Diretório de download
-    "download.prompt_for_download": False,  # Desativa o prompt de confirmação de download
+    "download.default_directory": download_dir,  # Diretório de
+    "download.prompt_for_download": False,  # Desativa o prompt de confirmação de
     "download.directory_upgrade": True,
     "safebrowsing.enabled": True  # Habilita a navegação segura (impede mensagens de segurança)
 }
+
 chrome_options.add_experimental_option("prefs", prefs)
 
 driver = webdriver.Chrome(options=chrome_options)
@@ -83,23 +83,18 @@ try:
     sleep(1)
     #localiza o botão de configuração e gera um click
     acao_site("//button[contains(@class, 'btnSettings')]")
-
 except Exception as e:
     print("Erro ao encontrar o botão:", e)
-
-
 
 try:
     #localiza o painel de expanção para pesquisar a data e expande
     acao_site("//mat-expansion-panel-header[@id='mat-expansion-panel-header-16']")
-
 except Exception as e:
     print("Erro ao encontrar ou expandir aba:", e)
 
 
 #Aqui irá encontrar os campos de data, criar um modal para pausar a aplicação para preenchimento manual das datas
 try:
-
     # Localiza os campos de data
     campo_data_inicio = driver.find_element(By.XPATH, "//input[@id='mat-input-28']")
     campo_data_final = driver.find_element(By.XPATH, "//input[@id='mat-input-29']")
@@ -109,7 +104,6 @@ try:
         EC.element_to_be_clickable((By.ID, "mat-input-28"))
     )
     campo_data_inicio.click()
-
 
     # Cria uma div na página com uma mensagem para preencher as datas desejadas
     driver.execute_script("""
@@ -158,22 +152,21 @@ try:
     # Após o popup sair será gerado um click no botão "Aplicar e salvar filtros"
     sleep(1)
     acao_site("//button[@class='mat-focus-indicator ng-tns-c233-107 mat-raised-button mat-button-base mat-accent']")
-
 except Exception as e:
     print(f"Erro durante ao preencher campos de datas: {e}")
 
-sleep(15)
+sleep(2)
+
+
+sleep(18)
 
 try:
     expandir_painel("//div[@id='mat-select-value-97']", "mat-select-value-97")
     sleep(2)
     downloadArquivos("//mat-option[@id='mat-option-227']", 'mat-option-227')
     sleep(5)
-
-
 except Exception as e:
     print(f"Erro ao fazer download: {e}")
-
 
 elemento = driver.find_element(By.XPATH, '//div[@id="mat-select-value-95"]')  # Insira o XPATH correto do elemento
 # Realiza o scroll até o elemento
@@ -185,14 +178,12 @@ try:
     expandir_painel("//div[@id='mat-select-value-95']", "mat-select-value-95")
     sleep(2)
     downloadArquivos("//mat-option[@id='mat-option-224']", "mat-option-224")
-
 except Exception as e:
     print(f"Erro ao expandir área de download: {e}")
 
 sleep(3)
 
 try:
-    #downloadArquivos("//mat-option[@id='mat-option mat-focus-indicator ng-tns-c130-220']", "mat-option-221")
 
     expandirElemento = driver.find_element(By.ID, "mat-select-value-93")
     # Força o clique com JavaScript
@@ -201,7 +192,6 @@ try:
     sleep(2)
     fazerDownload = driver.find_element(By.XPATH, "//mat-option[@value='detalhamento-msgestor']")
     fazerDownload.click()
-
 except Exception as e:
     print(f"Erro ao expandir área de download: {e}")
 finally:
@@ -260,10 +250,9 @@ finally:
 sleep(5)
 
 # Caminho da pasta onde os arquivos Excel estão localizados
-diretorio = "M:\\ADM DE VENDAS PJ\\Diario Imput\\DownloadArquivos\\arquivos baixados"
 
 # Lista todos os arquivos da pasta
-arquivos = [f for f in os.listdir(diretorio) if f.endswith('.xlsx')]
+arquivos = [f for f in os.listdir(download_dir) if f.endswith('.xlsx')]
 
 # Inicializa uma lista para armazenar os DataFrames
 lista_dfs = []
@@ -271,7 +260,7 @@ lista_dfs = []
 # Itera sobre cada arquivo Excel encontrado
 for arquivo in arquivos:
     # Lê o arquivo Excel
-    caminho_arquivo = os.path.join(diretorio, arquivo)
+    caminho_arquivo = os.path.join(download_dir, arquivo)
     df = pd.read_excel(caminho_arquivo)
 
     # Adiciona o DataFrame à lista
@@ -280,7 +269,11 @@ for arquivo in arquivos:
 # Concatena todos os DataFrames da lista
 df_final = pd.concat(lista_dfs, ignore_index=True, join="outer")
 
-caminho_salvar = "M:\\ADM DE VENDAS PJ\\Diario Imput\\DownloadArquivos\\arquivo_unificado.xlsx"
+
+nome_arquivo = "arquivo_consolidado.xlsx"
+caminho = input(r"Insira aqui o caminho para salvar o arquivo consolidado: ")
+
+caminho_salvar = caminho+"\\"+nome_arquivo
 
 # Salva o DataFrame final em um novo arquivo Excel no caminho especificado
 df_final.to_excel(caminho_salvar, index=False)
@@ -291,7 +284,7 @@ sleep(10)
 
 # Exclui os arquivos originais
 for arquivo in arquivos:
-    caminho_arquivo = os.path.join(diretorio, arquivo)
+    caminho_arquivo = os.path.join(download_dir, arquivo)
     try:
         os.remove(caminho_arquivo)  # Apaga o arquivo
         print(f"Arquivo {arquivo} apagado com sucesso.")
@@ -301,12 +294,16 @@ for arquivo in arquivos:
 sleep(5)
 
 # Caminho para o arquivo unificado
-arquivo_unificado = "M:\\ADM DE VENDAS PJ\\Diario Imput\\DownloadArquivos\\arquivo_unificado.xlsx"
+arquivo_unificado = caminho_salvar
 
 # Caminho para o arquivo de destino (o que você vai substituir)
-arquivo_destino = "M:\\ADM DE VENDAS PJ\\Diario Imput\\planilhaTeste\\DIARIO IMPUT V.37.xlsb"
+nome_arquivo = "DIARIO IMPUT V.37.xlsb"
+destino_arquivo = input(rf"Digite o caminho do arquivo: "  )
+arquivo_destino = destino_arquivo+"\\"+nome_arquivo
 
-# Cria uma pasta temporária única para o usuário
+#arquivo_destino = "M:\\ADM DE VENDAS PJ\\Diario Imput\\planilhaTeste\\DIARIO IMPUT V.37.xlsb"
+
+# Cria uma pasta temporária única para o
 pasta_temp = tempfile.mkdtemp()  # Cria uma pasta temporária única
 arquivo_local = os.path.join(pasta_temp, "DIARIO IMPUT V.37.xlsb")  # Caminho do arquivo temporário
 
@@ -322,7 +319,6 @@ except Exception as e:
 df_unificado = pd.read_excel(arquivo_unificado)
 
 # Lê o arquivo de destino (arquivo .xlsb) usando xlwings
-
 
 try:
     # Abre o arquivo .xlsb usando xlwings
@@ -351,10 +347,8 @@ try:
     wb_destino.close()
 
     print("Alterações feitas com sucesso!")
-
 except Exception as e:
     print(f"Erro ao tentar abrir o arquivo {arquivo_destino}: {e}")
-
 
 # Copia o arquivo modificado de volta para a rede
 try:
