@@ -79,7 +79,7 @@
  [],
  False,
  False,
- 1742311133,
+ 1742402504,
  [('run.exe',
    'C:\\Users\\06010940184\\automacao_diario_MS_Gestor\\python\\.venv\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\run.exe',
    'EXECUTABLE')],

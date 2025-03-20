@@ -11,7 +11,7 @@ import os
 import xlwings as xw
 import shutil
 import tempfile
-
+import datetime
 
 
 chrome_options = Options()
@@ -60,6 +60,23 @@ def downloadArquivos(xpath, path):
     download_1.click()
     sleep(1)
 
+# Função para aguardar o término do download
+padrao_nome = "relatorio_msgestor_detalhamento_itens-exportacao"
+def esperar_download():
+    arquivos_antes = set(os.listdir(download_dir))  # Lista antes do download
+    while True:
+        sleep(1)  # Espera um segundo para não sobrecarregar a CPU
+        arquivos_depois = set(os.listdir(download_dir))
+        setNnovos_arquivos = arquivos_depois - arquivos_antes  # Identifica novos arquivos
+
+        # Verifica se há um novo arquivo e se ele terminou de baixar
+        for setArquivo in setNnovos_arquivos:
+            if setArquivo.startswith(padrao_nome) and not setArquivo.endswith(".crdownload"):
+                print(f"Download concluído: {setArquivo}")
+                return os.path.join(download_dir, setArquivo)
+
+
+
 try:
     #localiza a endereço e entrar no site MSGestor
     driver.get("https://msgestor.msconnect.com.br/pages/auth/login")
@@ -93,7 +110,6 @@ try:
     acao_site("//mat-expansion-panel-header[@id='mat-expansion-panel-header-16']")
 except Exception as e:
     print("Erro ao encontrar ou expandir aba:", e)
-
 
 #Aqui irá encontrar os campos de data, criar um modal para pausar a aplicação para preenchimento manual das datas
 try:
@@ -162,32 +178,37 @@ except Exception as e:
     print(f"Erro durante ao preencher campos de datas: {e}")
 
 sleep(2)
-
-
 sleep(18)
+
+
 
 try:
     expandir_painel("//div[@id='mat-select-value-97']", "mat-select-value-97")
     sleep(2)
     downloadArquivos("//mat-option[@id='mat-option-227']", 'mat-option-227')
-    sleep(5)
+    print("O próximo download será iniciado assim que o primeiro for concluído.")
+    esperar_download()
 except Exception as e:
     print(f"Erro ao fazer download: {e}")
+
+
 
 elemento = driver.find_element(By.XPATH, '//div[@id="mat-select-value-95"]')  # Insira o XPATH correto do elemento
 # Realiza o scroll até o elemento
 driver.execute_script("arguments[0].scrollIntoView();", elemento)
 
-sleep(2)
+
 
 try:
     expandir_painel("//div[@id='mat-select-value-95']", "mat-select-value-95")
-    sleep(2)
     downloadArquivos("//mat-option[@id='mat-option-224']", "mat-option-224")
+    print("O terceiro download será iniciado assim que o segundo for concluído.")
+    esperar_download()
 except Exception as e:
     print(f"Erro ao expandir área de download: {e}")
 
-sleep(3)
+
+
 
 try:
 
@@ -198,9 +219,11 @@ try:
     sleep(2)
     fazerDownload = driver.find_element(By.XPATH, "//mat-option[@value='detalhamento-msgestor']")
     fazerDownload.click()
+    esperar_download()
 except Exception as e:
     print(f"Erro ao expandir área de download: {e}")
-finally:
+
+'''finally:
     from selenium.webdriver.common.by import By
     from selenium.webdriver.support.ui import WebDriverWait
     from selenium.webdriver.support import expected_conditions as EC
@@ -251,9 +274,11 @@ finally:
     driver.quit()  # Fecha o navegador
 
     # A automação continua
-    print("Navegador fechado, e a aplicação continuará.")
+    print("Navegador fechado, e a aplicação continuará.")'''
 
-sleep(5)
+print("Todos os downloads foram concluídos!")
+sleep(3)
+driver.quit()  # Fecha o navegador
 
 # Caminho da pasta onde os arquivos Excel estão localizados
 
@@ -289,9 +314,9 @@ caminho_salvar = caminho+"\\"+nome_arquivo
 df_final.to_excel(caminho_salvar, index=False)
 
 print('')
-print("Arquivos unificados com colunas diferentes!")
+print("Arquivos consolidados com sucesso!!")
 print('')
-sleep(10)
+sleep(5)
 
 # Exclui os arquivos originais
 for arquivo in arquivos:
@@ -339,14 +364,13 @@ except Exception as e:
 df_unificado = pd.read_excel(arquivo_unificado)
 
 # Lê o arquivo de destino (arquivo .xlsb) usando xlwings
+# Abre o arquivo .xlsb usando xlwings
 
+wb_destino = xw.Book(arquivo_local)
+
+# Acessa a aba específica pelo nome (substitua 'Nome_da_Aba' pelo nome real da aba)
+aba_destino = wb_destino.sheets['Esteira']
 try:
-    # Abre o arquivo .xlsb usando xlwings
-    wb_destino = xw.Book(arquivo_local)
-
-    # Acessa a aba específica pelo nome (substitua 'Nome_da_Aba' pelo nome real da aba)
-    aba_destino = wb_destino.sheets['Esteira']
-
     # Agora você pode fazer operações nessa aba
     # Por exemplo, para ler dados de uma célula específica
     valor = aba_destino.range('A3').value
@@ -363,14 +387,132 @@ try:
     aba_destino.range(intervalo).value = df_unificado.values.tolist()
 
     # Salva e fecha o arquivo
-    wb_destino.save()
-    wb_destino.close()
+    #wb_destino.save()
 
     print('')
     print("Alterações feitas com sucesso!")
     print('')
 except Exception as e:
     print(f"Erro ao tentar abrir o arquivo {arquivo_destino}: {e}")
+
+print("Iniciando a manipulação dos dados da planilha!")
+print(" ")
+
+'''try:
+    # ---------------------------- 1° FORMATAÇÃO DA DATA ---------------------------- #
+    # Obtém os valores da coluna B a partir da linha 3
+    # Obtém os valores da coluna B a partir da linha 3
+    coluna_b = aba_destino.range("B3:B" + str(aba_destino.cells.last_cell.row)).value
+
+    # Verifica e formata os valores, removendo horas se for uma data ou string
+    for i in range(len(coluna_b)):
+        if isinstance(coluna_b[i], str):
+            coluna_b[i] = coluna_b[i].split(" ")[0]  # Remove a parte das horas
+        elif isinstance(coluna_b[i], (int, float)):
+            # Converte números para data correta do Excel
+            data_base = datetime.datetime(1899, 12, 30)  # O Excel começa em 30/12/1899
+            data_convertida = data_base + datetime.timedelta(days=coluna_b[i])
+            coluna_b[i] = data_convertida.strftime("%d/%m/%Y")  # Formata para "dd/mm/yyyy"
+
+    # Reinsere os valores formatados na planilha
+    aba_destino.range("B3:B" + str(len(coluna_b) + 2)).value = coluna_b  # Ajusta a reinserção
+
+    print("A data foi formatada com sucesso!")
+except Exception as e:
+    print(f"Erro ao formatar a data {e}")
+
+try:
+    # ---------------------------- 2° REMOVER DADOS DE AF4:AS ---------------------------- #
+    aba_destino.range("AF4:AS" + str(aba_destino.cells.last_cell.row)).value = None
+
+    print("os dados foram removidos com sucesso!!")
+except Exception as e:
+    print(f"Erro ao remover os dados: {e}")
+
+
+try:
+    # ---------------------------- 3° EXPANDIR AS FÓRMULAS ---------------------------- #
+    # Copia a linha 3 das colunas AF até AS
+    formulas = aba_destino.range("AF3:AS3").formula  # Pega as fórmulas da linha 3
+    ultima_linha = aba_destino.cells.last_cell.row  # Última linha com dados
+
+    # Aplica as fórmulas para todas as linhas a partir da linha 4 até a última
+    aba_destino.range(f"AF4:AS{ultima_linha}").formula = formulas
+
+    # ---------------------------- 4° SALVAR E CALCULAR FÓRMULAS ---------------------------- #
+    wb_destino.save()
+    wb_destino.app.calculate()  # Força o cálculo das fórmulas
+
+    # ---------------------------- 5° COPIAR E COLAR VALORES ---------------------------- #
+    valores_calculados = aba_destino.range(f"AF4:AS{ultima_linha}").value
+    aba_destino.range(f"AF4:AS{ultima_linha}").value = valores_calculados  # Cola valores
+
+    print("Operações realizadas com sucesso!!")
+    print(" ")
+    wb_destino.close()
+
+except Exception as e:
+    print(f"Erro ao expandir, salvar, calcular ou colar(dados) as fórmulas {e}")'''
+# Abre o arquivo .xlsb
+# wb_destino = xw.Book(arquivo_local)
+# aba_destino = wb_destino.sheets['Esteira']  # Substitua 'Esteira' pelo nome correto da aba
+# Faz as manipulações no arquivo local
+try:
+
+
+    # Desativa atualizações e cálculos
+    wb_destino.app.screen_updating = False
+    wb_destino.app.calculation = 'manual'
+
+    # Passo 1: Formatar a coluna B com Pandas
+    ultima_linha = aba_destino.cells.last_cell.row
+    coluna_b = aba_destino.range(f"B3:B{ultima_linha}").value
+
+    # Converte para DataFrame para processamento eficiente
+    df_coluna_b = pd.Series(coluna_b)
+    df_coluna_b = df_coluna_b.apply(
+        lambda x: x.split(" ")[0] if isinstance(x, str) and " " in x
+        else (datetime.datetime(1899, 12, 30) + datetime.timedelta(days=x)).strftime("%d/%m/%Y") if isinstance(x, (int, float))
+        else x
+    )
+    aba_destino.range(f"B3:B{ultima_linha}").value = [[v] for v in df_coluna_b]
+
+    # Passo 2: Remover dados de AF4:AS
+    aba_destino.range(f"AF4:AS{ultima_linha}").clear_contents()
+
+    # Passo 3 e 5: Expandir fórmulas e colar valores em lotes
+    formulas = aba_destino.range("AF3:AS3").formula
+    lote_tamanho = 1000  # Processa 1000 linhas por vez
+    inicio = 4
+    while inicio <= ultima_linha:
+        fim = min(inicio + lote_tamanho - 1, ultima_linha)
+        aba_destino.range(f"AF{inicio}:AS{fim}").formula = formulas
+        wb_destino.app.calculate()  # Calcula apenas o lote atual
+        valores_calculados = aba_destino.range(f"AF{inicio}:AS{fim}").value
+        aba_destino.range(f"AF{inicio}:AS{fim}").value = valores_calculados
+        inicio = fim + 1
+
+    # Reativa atualizações e cálculos
+    wb_destino.app.screen_updating = True
+    wb_destino.app.calculation = 'automatic'
+
+    # Salva e fecha o arquivo local
+    wb_destino.save()
+    wb_destino.close()
+
+    print("Manipulações realizadas com sucesso no arquivo local!")
+
+    # Copia o arquivo de volta para a rede
+    try:
+        shutil.copy(arquivo_local, arquivo_destino)
+        print(f"Arquivo copiado de volta para a rede: {arquivo_destino}")
+    except Exception as e:
+        print(f"Erro ao copiar o arquivo de volta para a rede: {e}")
+
+except Exception as e:
+    print(f"Erro ao processar a planilha: {e}")
+    if 'wb_destino' in locals():
+        wb_destino.close()
 
 # Copia o arquivo modificado de volta para a rede
 try:
