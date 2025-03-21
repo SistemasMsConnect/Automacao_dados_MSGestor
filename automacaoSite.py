@@ -219,62 +219,11 @@ try:
     sleep(2)
     fazerDownload = driver.find_element(By.XPATH, "//mat-option[@value='detalhamento-msgestor']")
     fazerDownload.click()
+    print("Realizando download do terceiro arquivo.")
     esperar_download()
 except Exception as e:
     print(f"Erro ao expandir área de download: {e}")
 
-'''finally:
-    from selenium.webdriver.common.by import By
-    from selenium.webdriver.support.ui import WebDriverWait
-    from selenium.webdriver.support import expected_conditions as EC
-
-    # Cria uma div na página com uma mensagem para fechar o driver
-    driver.execute_script("""
-        var popup = document.createElement('div');
-        popup.style.position = 'fixed';
-        popup.style.top = '50%';
-        popup.style.left = '30%';
-        popup.style.transform = 'translate(-50%, -50%)';
-        popup.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        popup.style.color = 'white';
-        popup.style.padding = '20px';
-        popup.style.borderRadius = '10px';
-        popup.style.fontSize = '18px';
-        popup.style.zIndex = '9999';  // Definindo um z-index alto para garantir que o popup fique à frente
-        popup.innerHTML = 'Quando finalizar os 3 downloads clique em OK para continuar...';
-
-        var button = document.createElement('button');
-        button.innerText = 'OK';
-        button.style.marginTop = '10px';
-        button.style.backgroundColor = '#4CAF50';
-        button.style.color = 'white';
-        button.style.padding = '10px 20px';
-        button.style.border = 'none';
-        button.style.borderRadius = '5px';
-        button.style.cursor = 'pointer';
-        button.onclick = function() {
-            popup.remove();  // Remove o popup
-            // Envia um evento para o Python saber que o botão foi clicado
-            window.localStorage.setItem('close_browser', 'true');  // Sinaliza que o botão foi clicado
-        };
-
-        popup.appendChild(button);
-        document.body.appendChild(popup);
-    """)
-
-    # Exibe a mensagem no terminal para indicar que o modal foi exibido
-    print("O popup foi exibido. Clique em OK para fechar o navegador.")
-
-    # Aguarda até que o botão OK seja clicado e a variável no localStorage seja definida
-    WebDriverWait(driver, 300).until(
-        lambda driver: driver.execute_script("return window.localStorage.getItem('close_browser')") == 'true'
-    )
-
-    # Após clicar em OK, fechamos o driver
-    driver.quit()  # Fecha o navegador
-
-    # A automação continua
-    print("Navegador fechado, e a aplicação continuará.")'''
 
 print("Todos os downloads foram concluídos!")
 sleep(3)
@@ -398,109 +347,66 @@ except Exception as e:
 print("Iniciando a manipulação dos dados da planilha!")
 print(" ")
 
-'''try:
-    # ---------------------------- 1° FORMATAÇÃO DA DATA ---------------------------- #
-    # Obtém os valores da coluna B a partir da linha 3
-    # Obtém os valores da coluna B a partir da linha 3
-    coluna_b = aba_destino.range("B3:B" + str(aba_destino.cells.last_cell.row)).value
-
-    # Verifica e formata os valores, removendo horas se for uma data ou string
-    for i in range(len(coluna_b)):
-        if isinstance(coluna_b[i], str):
-            coluna_b[i] = coluna_b[i].split(" ")[0]  # Remove a parte das horas
-        elif isinstance(coluna_b[i], (int, float)):
-            # Converte números para data correta do Excel
-            data_base = datetime.datetime(1899, 12, 30)  # O Excel começa em 30/12/1899
-            data_convertida = data_base + datetime.timedelta(days=coluna_b[i])
-            coluna_b[i] = data_convertida.strftime("%d/%m/%Y")  # Formata para "dd/mm/yyyy"
-
-    # Reinsere os valores formatados na planilha
-    aba_destino.range("B3:B" + str(len(coluna_b) + 2)).value = coluna_b  # Ajusta a reinserção
-
-    print("A data foi formatada com sucesso!")
-except Exception as e:
-    print(f"Erro ao formatar a data {e}")
 
 try:
-    # ---------------------------- 2° REMOVER DADOS DE AF4:AS ---------------------------- #
-    aba_destino.range("AF4:AS" + str(aba_destino.cells.last_cell.row)).value = None
-
-    print("os dados foram removidos com sucesso!!")
-except Exception as e:
-    print(f"Erro ao remover os dados: {e}")
-
-
-try:
-    # ---------------------------- 3° EXPANDIR AS FÓRMULAS ---------------------------- #
-    # Copia a linha 3 das colunas AF até AS
-    formulas = aba_destino.range("AF3:AS3").formula  # Pega as fórmulas da linha 3
-    ultima_linha = aba_destino.cells.last_cell.row  # Última linha com dados
-
-    # Aplica as fórmulas para todas as linhas a partir da linha 4 até a última
-    aba_destino.range(f"AF4:AS{ultima_linha}").formula = formulas
-
-    # ---------------------------- 4° SALVAR E CALCULAR FÓRMULAS ---------------------------- #
-    wb_destino.save()
-    wb_destino.app.calculate()  # Força o cálculo das fórmulas
-
-    # ---------------------------- 5° COPIAR E COLAR VALORES ---------------------------- #
-    valores_calculados = aba_destino.range(f"AF4:AS{ultima_linha}").value
-    aba_destino.range(f"AF4:AS{ultima_linha}").value = valores_calculados  # Cola valores
-
-    print("Operações realizadas com sucesso!!")
-    print(" ")
-    wb_destino.close()
-
-except Exception as e:
-    print(f"Erro ao expandir, salvar, calcular ou colar(dados) as fórmulas {e}")'''
-# Abre o arquivo .xlsb
-# wb_destino = xw.Book(arquivo_local)
-# aba_destino = wb_destino.sheets['Esteira']  # Substitua 'Esteira' pelo nome correto da aba
-# Faz as manipulações no arquivo local
-try:
-
+    # Abre o arquivo local
+    wb_destino = xw.Book(arquivo_local)
+    aba_destino = wb_destino.sheets['Esteira']
+    print("Arquivo aberto com sucesso")
 
     # Desativa atualizações e cálculos
     wb_destino.app.screen_updating = False
     wb_destino.app.calculation = 'manual'
+    print("Configurações do Excel ajustadas")
 
-    # Passo 1: Formatar a coluna B com Pandas
-    ultima_linha = aba_destino.cells.last_cell.row
-    coluna_b = aba_destino.range(f"B3:B{ultima_linha}").value
+    # Passo 1: Formatar a coluna B com Pandas e encontrar a última linha real
+    # Busca a última linha com dados na coluna B
+    ultima_linha_real = aba_destino.range("B" + str(aba_destino.cells.last_cell.row)).end('up').row
+    if ultima_linha_real < 3:
+        ultima_linha_real = 3  # Garante que comece em B3
+    print(f"Última linha real detectada na coluna B: {ultima_linha_real}")
 
-    # Converte para DataFrame para processamento eficiente
+    coluna_b = aba_destino.range(f"B3:B{ultima_linha_real}").value
     df_coluna_b = pd.Series(coluna_b)
     df_coluna_b = df_coluna_b.apply(
         lambda x: x.split(" ")[0] if isinstance(x, str) and " " in x
         else (datetime.datetime(1899, 12, 30) + datetime.timedelta(days=x)).strftime("%d/%m/%Y") if isinstance(x, (int, float))
         else x
     )
-    aba_destino.range(f"B3:B{ultima_linha}").value = [[v] for v in df_coluna_b]
+    aba_destino.range(f"B3:B{ultima_linha_real}").value = [[v] for v in df_coluna_b]
+    print("Passo 1 concluído: Coluna B formatada")
 
-    # Passo 2: Remover dados de AF4:AS
-    aba_destino.range(f"AF4:AS{ultima_linha}").clear_contents()
+    # Passo 2: Remover dados de AF4:AS apenas até a última linha real
+    aba_destino.range(f"AF4:AS{ultima_linha_real}").clear_contents()
+    print("Passo 2 concluído: Dados de AF4:AS removidos")
 
-    # Passo 3 e 5: Expandir fórmulas e colar valores em lotes
+    # Passo 3 e 5: Expandir fórmulas e colar valores em lotes menores
     formulas = aba_destino.range("AF3:AS3").formula
-    lote_tamanho = 1000  # Processa 1000 linhas por vez
+    print(f"Fórmulas a serem aplicadas: {formulas}")
+    lote_tamanho = 50000
     inicio = 4
-    while inicio <= ultima_linha:
-        fim = min(inicio + lote_tamanho - 1, ultima_linha)
+    while inicio <= ultima_linha_real:
+        fim = min(inicio + lote_tamanho - 1, ultima_linha_real)
+        print(f"Aplicando fórmulas em AF{inicio}:AS{fim}")
         aba_destino.range(f"AF{inicio}:AS{fim}").formula = formulas
-        wb_destino.app.calculate()  # Calcula apenas o lote atual
+        print(f"Calculando lote AF{inicio}:AS{fim}")
+        wb_destino.app.calculate()
         valores_calculados = aba_destino.range(f"AF{inicio}:AS{fim}").value
         aba_destino.range(f"AF{inicio}:AS{fim}").value = valores_calculados
+        print(f"Lote processado: AF{inicio}:AS{fim}")
+        #sleep(0.9)  # Pausa para liberar memória
         inicio = fim + 1
+    print("Passo 3 e 5 concluídos: Fórmulas expandidas e valores colados")
 
     # Reativa atualizações e cálculos
     wb_destino.app.screen_updating = True
     wb_destino.app.calculation = 'automatic'
+    print("Configurações do Excel restauradas")
 
     # Salva e fecha o arquivo local
     wb_destino.save()
     wb_destino.close()
-
-    print("Manipulações realizadas com sucesso no arquivo local!")
+    print("Arquivo local salvo e fechado")
 
     # Copia o arquivo de volta para a rede
     try:
@@ -509,21 +415,16 @@ try:
     except Exception as e:
         print(f"Erro ao copiar o arquivo de volta para a rede: {e}")
 
+    print("Manipulações realizadas com sucesso no arquivo local!")
+
 except Exception as e:
     print(f"Erro ao processar a planilha: {e}")
     if 'wb_destino' in locals():
         wb_destino.close()
 
-# Copia o arquivo modificado de volta para a rede
-try:
-    # Copia o arquivo modificado de volta para a rede
-    shutil.copy(arquivo_local, arquivo_destino)
-    print('')
-    print("Arquivo copiado de volta para a rede.")
-    print('')
-except Exception as e:
-    print(f"Erro ao copiar o arquivo de volta para a rede: {e}")
-    exit()
+
+
+
 
 # Exclui o arquivo temporário local
 try:
