@@ -1,4 +1,4 @@
-from selenium import webdriver
+from selenium import webdriver #Necessário instalação com pip install
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from time import sleep
@@ -6,12 +6,12 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-import pandas as pd
+import pandas as pd #Necessário instalação com pip install
 import os
-import xlwings as xw
+import xlwings as xw #Necessário instalação com pip install
 import shutil
 import tempfile
-import datetime
+import datetime #Necessário instalação com pip install
 
 
 chrome_options = Options()
@@ -20,6 +20,8 @@ chrome_options.add_argument("--start-maximized")  # Para abrir o navegador maxim
 download_dir = input(r"Insira o caminho onde sera feito o download dos 3 arquivos: ")
 print('')
 print('Caminho inserido com sucesso! Por favor aguarde!')
+
+#Realizando pré-configurações no chrome
 prefs = {
     "profile.default_content_settings.popups": 0,  # Bloqueia popups de confirmação
     "download.default_directory": download_dir,  # Diretório de
@@ -41,6 +43,7 @@ def acao_site(elemento):
     )
     campo_expandir.click()
 
+#função para expandir o painel de cada download do site
 def expandir_painel(xpath, path):
 
     #encontra o painel de expansão de download e gera um click para expandir
@@ -52,6 +55,7 @@ def expandir_painel(xpath, path):
     )
     campo_download.click()
 
+#Função para realizar download de arquivos do site
 def downloadArquivos(xpath, path):
     download_1 = driver.find_element(By.XPATH, xpath)
     download_1 = WebDriverWait(driver, 5).until(
@@ -60,7 +64,7 @@ def downloadArquivos(xpath, path):
     download_1.click()
     sleep(1)
 
-# Função para aguardar o término do download
+# Função para aguardar o término de cada download
 padrao_nome = "relatorio_msgestor_detalhamento_itens-exportacao"
 def esperar_download():
     arquivos_antes = set(os.listdir(download_dir))  # Lista antes do download
@@ -76,7 +80,7 @@ def esperar_download():
                 return os.path.join(download_dir, setArquivo)
 
 
-
+#Faz a conexao do python com o site especifico
 try:
     #localiza a endereço e entrar no site MSGestor
     driver.get("https://msgestor.msconnect.com.br/pages/auth/login")
@@ -87,8 +91,10 @@ try:
     campo_senha = driver.find_element(By.XPATH,"//input[@id='mat-input-27']")
     sleep(1)
     #Preencge os campos de login usuário e senha
-    campo_usuario.send_keys('allef.sousa')
-    campo_senha.send_keys('98638C3')
+    inserir_usuario = input("digite o seu USUARIO: ")
+    inserir_senha = input("Digite a sua SENHA: ")
+    campo_usuario.send_keys(inserir_usuario)
+    campo_senha.send_keys(inserir_senha)
     sleep(1)
     #Gera um click no ENTER para realizar o Login
     campo_senha.send_keys(Keys.RETURN)
@@ -180,8 +186,7 @@ except Exception as e:
 sleep(2)
 sleep(18)
 
-
-
+#Utilizando a função para expandir o primeiro painel de download e realizar o download
 try:
     expandir_painel("//div[@id='mat-select-value-97']", "mat-select-value-97")
     sleep(2)
@@ -198,7 +203,7 @@ elemento = driver.find_element(By.XPATH, '//div[@id="mat-select-value-95"]')  # 
 driver.execute_script("arguments[0].scrollIntoView();", elemento)
 
 
-
+#Utilizando a função para expandir o segundo painel de download e realizar o download
 try:
     expandir_painel("//div[@id='mat-select-value-95']", "mat-select-value-95")
     downloadArquivos("//mat-option[@id='mat-option-224']", "mat-option-224")
@@ -209,13 +214,11 @@ except Exception as e:
 
 
 
-
+#Força o JavaScript clicar no botão, pois o metodo usado em outros estava dando erro kkkk
 try:
-
     expandirElemento = driver.find_element(By.ID, "mat-select-value-93")
     # Força o clique com JavaScript
     driver.execute_script("arguments[0].click();", expandirElemento)
-
     sleep(2)
     fazerDownload = driver.find_element(By.XPATH, "//mat-option[@value='detalhamento-msgestor']")
     fazerDownload.click()
@@ -285,11 +288,11 @@ arquivo_unificado = caminho_salvar
 
 # Caminho para o arquivo de destino (o que você vai substituir)
 print('')
-nome_arquivo = "DIARIO IMPUT V.37.xlsb"
+nome_arquivo_diario = "DIARIO IMPUT V.37.xlsb"
 destino_arquivo = input(rf"Digite o caminho do arquivo DIARIO IMPUT: "  )
 print('')
 
-arquivo_destino = destino_arquivo+"\\"+nome_arquivo
+arquivo_destino = destino_arquivo+"\\"+nome_arquivo_diario
 print('')
 print('Caminho inserido com sucesso! Por favor aguarde!')
 print('')
@@ -335,8 +338,7 @@ try:
     # Substitui apenas os dados, mantendo os títulos intactos
     aba_destino.range(intervalo).value = df_unificado.values.tolist()
 
-    # Salva e fecha o arquivo
-    #wb_destino.save()
+
 
     print('')
     print("Alterações feitas com sucesso!")
@@ -347,7 +349,7 @@ except Exception as e:
 print("Iniciando a manipulação dos dados da planilha!")
 print(" ")
 
-
+#Aqui esta iniciando a manipulação de dados da planilha
 try:
     # Abre o arquivo local
     wb_destino = xw.Book(arquivo_local)
@@ -383,7 +385,7 @@ try:
     # Passo 3 e 5: Expandir fórmulas e colar valores em lotes menores
     formulas = aba_destino.range("AF3:AS3").formula
     print(f"Fórmulas a serem aplicadas: {formulas}")
-    lote_tamanho = 50000
+    lote_tamanho = 50000 #em um computador mais potente pode aumentar esse valor (em pc menos potente, diminui esse valor)
     inicio = 4
     while inicio <= ultima_linha_real:
         fim = min(inicio + lote_tamanho - 1, ultima_linha_real)
@@ -394,7 +396,7 @@ try:
         valores_calculados = aba_destino.range(f"AF{inicio}:AS{fim}").value
         aba_destino.range(f"AF{inicio}:AS{fim}").value = valores_calculados
         print(f"Lote processado: AF{inicio}:AS{fim}")
-        #sleep(0.9)  # Pausa para liberar memória
+        #sleep(0.9)  # Pausa para liberar memória #Computador menos potente descomentar esse linha sleep(0.9)
         inicio = fim + 1
     print("Passo 3 e 5 concluídos: Fórmulas expandidas e valores colados")
 
@@ -421,10 +423,6 @@ except Exception as e:
     print(f"Erro ao processar a planilha: {e}")
     if 'wb_destino' in locals():
         wb_destino.close()
-
-
-
-
 
 # Exclui o arquivo temporário local
 try:
