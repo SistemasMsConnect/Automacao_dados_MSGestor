@@ -1,4 +1,13 @@
-from selenium import webdriver #Necessário instalação com pip install
+"""
+** Necessário instalar o selenium
+** Necessário instalar o pandas
+** Necessário instalar o xlwings
+** Necessário instalar o pyopenxl
+** Caso queria criar um executável pode instalar o pyinstaller
+e então executar o pyinstaller nome_da_aplicação
+"""
+
+from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from time import sleep
@@ -6,17 +15,18 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-import pandas as pd #Necessário instalação com pip install
+import pandas as pd
 import os
-import xlwings as xw #Necessário instalação com pip install
+import xlwings as xw
 import shutil
 import tempfile
-import datetime #Necessário instalação com pip install
+import datetime
 
 
 chrome_options = Options()
 chrome_options.add_argument("--start-maximized")  # Para abrir o navegador maximizado
 
+#Solicitando caminho para download do arquivo do site.
 download_dir = input(r"Insira o caminho onde sera feito o download dos 3 arquivos: ")
 print('')
 print('Caminho inserido com sucesso! Por favor aguarde!')
@@ -37,7 +47,7 @@ driver = webdriver.Chrome(options=chrome_options)
 #função para diminuir o código
 def acao_site(elemento):
 
-    #codigo para expendir o campo para buscar data
+    #codigo para expandir o campo para buscar data
     campo_expandir = WebDriverWait(driver, 5).until(
         EC.element_to_be_clickable((By.XPATH, elemento))
     )
@@ -86,15 +96,13 @@ try:
     driver.get("https://msgestor.msconnect.com.br/pages/auth/login")
     sleep(2)
 
-    #Localiza os campos de login Usuário e senha
+    #Localiza os campos de usuário e senha
     campo_usuario = driver.find_element(By.XPATH,"//input[@id='mat-input-26']")
     campo_senha = driver.find_element(By.XPATH,"//input[@id='mat-input-27']")
     sleep(1)
     #Preencge os campos de login usuário e senha
-    inserir_usuario = input("digite o seu USUARIO: ")
-    inserir_senha = input("Digite a sua SENHA: ")
-    campo_usuario.send_keys(inserir_usuario)
-    campo_senha.send_keys(inserir_senha)
+    campo_usuario.send_keys("allef.sousa")
+    campo_senha.send_keys("98638C3")
     sleep(1)
     #Gera um click no ENTER para realizar o Login
     campo_senha.send_keys(Keys.RETURN)
@@ -214,7 +222,7 @@ except Exception as e:
 
 
 
-#Força o JavaScript clicar no botão, pois o metodo usado em outros estava dando erro kkkk
+#Força o JavaScript clicar no botão, pois o metodo usado em outros estava dando erro haha
 try:
     expandirElemento = driver.find_element(By.ID, "mat-select-value-93")
     # Força o clique com JavaScript
@@ -361,12 +369,12 @@ try:
     wb_destino.app.calculation = 'manual'
     print("Configurações do Excel ajustadas")
 
-    # Passo 1: Formatar a coluna B com Pandas e encontrar a última linha real
+    # Passo 1: Formatar a coluna B com Pandas e encontrar a última linha com dados
     # Busca a última linha com dados na coluna B
     ultima_linha_real = aba_destino.range("B" + str(aba_destino.cells.last_cell.row)).end('up').row
     if ultima_linha_real < 3:
         ultima_linha_real = 3  # Garante que comece em B3
-    print(f"Última linha real detectada na coluna B: {ultima_linha_real}")
+    print(f"Última linha com dados detectada na coluna B: {ultima_linha_real}")
 
     coluna_b = aba_destino.range(f"B3:B{ultima_linha_real}").value
     df_coluna_b = pd.Series(coluna_b)
