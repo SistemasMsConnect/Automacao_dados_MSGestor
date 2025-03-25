@@ -101,8 +101,8 @@ try:
     campo_senha = driver.find_element(By.XPATH,"//input[@id='mat-input-27']")
     sleep(1)
     #Preencge os campos de login usuário e senha
-    campo_usuario.send_keys("allef.sousa")
-    campo_senha.send_keys("98638C3")
+    campo_usuario.send_keys("######") # Insira o login do usuario aqui
+    campo_senha.send_keys("######") # -Insira a senha do usuario aqui
     sleep(1)
     #Gera um click no ENTER para realizar o Login
     campo_senha.send_keys(Keys.RETURN)
