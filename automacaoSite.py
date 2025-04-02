@@ -21,6 +21,7 @@ import xlwings as xw
 import shutil
 import tempfile
 import datetime
+import time
 
 
 chrome_options = Options()
@@ -55,7 +56,6 @@ def acao_site(elemento):
 
 #função para expandir o painel de cada download do site
 def expandir_painel(xpath, path):
-
     #encontra o painel de expansão de download e gera um click para expandir
     campo_download = driver.find_element(By.XPATH, xpath)
 
@@ -79,7 +79,7 @@ padrao_nome = "relatorio_msgestor_detalhamento_itens-exportacao"
 def esperar_download():
     arquivos_antes = set(os.listdir(download_dir))  # Lista antes do download
     while True:
-        sleep(1)  # Espera um segundo para não sobrecarregar a CPU
+        sleep(1)  #tempo de espera para nao sobrecarregar o misero i3 3° kkk
         arquivos_depois = set(os.listdir(download_dir))
         setNnovos_arquivos = arquivos_depois - arquivos_antes  # Identifica novos arquivos
 
@@ -204,12 +204,9 @@ try:
 except Exception as e:
     print(f"Erro ao fazer download: {e}")
 
-
-
 elemento = driver.find_element(By.XPATH, '//div[@id="mat-select-value-95"]')  # Insira o XPATH correto do elemento
 # Realiza o scroll até o elemento
 driver.execute_script("arguments[0].scrollIntoView();", elemento)
-
 
 #Utilizando a função para expandir o segundo painel de download e realizar o download
 try:
@@ -219,8 +216,6 @@ try:
     esperar_download()
 except Exception as e:
     print(f"Erro ao expandir área de download: {e}")
-
-
 
 #Força o JavaScript clicar no botão, pois o metodo usado em outros estava dando erro haha
 try:
@@ -330,6 +325,7 @@ wb_destino = xw.Book(arquivo_local)
 
 # Acessa a aba específica pelo nome (substitua 'Nome_da_Aba' pelo nome real da aba)
 aba_destino = wb_destino.sheets['Esteira']
+
 try:
     # Agora você pode fazer operações nessa aba
     # Por exemplo, para ler dados de uma célula específica
@@ -345,9 +341,6 @@ try:
 
     # Substitui apenas os dados, mantendo os títulos intactos
     aba_destino.range(intervalo).value = df_unificado.values.tolist()
-
-
-
     print('')
     print("Alterações feitas com sucesso!")
     print('')
@@ -362,6 +355,7 @@ try:
     # Abre o arquivo local
     wb_destino = xw.Book(arquivo_local)
     aba_destino = wb_destino.sheets['Esteira']
+    ws_dados = wb_destino.sheets['Dados']
     print("Arquivo aberto com sucesso")
 
     # Desativa atualizações e cálculos
@@ -376,14 +370,35 @@ try:
         ultima_linha_real = 3  # Garante que comece em B3
     print(f"Última linha com dados detectada na coluna B: {ultima_linha_real}")
 
+    # Passo 1: Remover o horário da coluna B (data_venda)
+    ultima_linha_real = aba_destino.range("B" + str(aba_destino.cells.last_cell.row)).end('up').row
+    if ultima_linha_real < 3:
+        ultima_linha_real = 3
+    print(f"Última linha real detectada na coluna B: {ultima_linha_real}")
+
+    # Lê os valores da coluna B
     coluna_b = aba_destino.range(f"B3:B{ultima_linha_real}").value
     df_coluna_b = pd.Series(coluna_b)
-    df_coluna_b = df_coluna_b.apply(
-        lambda x: x.split(" ")[0] if isinstance(x, str) and " " in x
-        else (datetime.datetime(1899, 12, 30) + datetime.timedelta(days=x)).strftime("%d/%m/%Y") if isinstance(x, (int, float))
-        else x
-    )
+
+
+    # Função pra remover o horário
+    def remover_horario(valor):
+        if isinstance(valor, str) and " " in valor:  # Verifica se tem dois espaços (data + horário)
+            return valor.split(" ")[0]  # Pega só a data
+        elif isinstance(valor, (int, float)):  # Se for um número (data do Excel)
+            return (datetime.datetime(1899, 12, 30) + datetime.timedelta(days=int(valor))).strftime("%d/%m/%Y")
+        elif isinstance(valor, datetime.datetime):  # Se já for um objeto datetime
+            return valor.strftime("%d/%m/%Y")
+        return valor  # Retorna o valor original se não for nenhum dos casos acima
+
+
+    # Aplica a função
+    df_coluna_b = df_coluna_b.apply(remover_horario)
+
+    # Escreve de volta como texto pra evitar que o Excel adicione horário
+    aba_destino.range(f"B3:B{ultima_linha_real}").number_format = "@"  # Formato texto
     aba_destino.range(f"B3:B{ultima_linha_real}").value = [[v] for v in df_coluna_b]
+    print("Passo 1 concluído: Horário removido da coluna B (data_venda)")
     print("Passo 1 concluído: Coluna B formatada")
 
     # Passo 2: Remover dados de AF4:AS apenas até a última linha real
@@ -408,6 +423,7 @@ try:
         inicio = fim + 1
     print("Passo 3 e 5 concluídos: Fórmulas expandidas e valores colados")
 
+
     # Reativa atualizações e cálculos
     wb_destino.app.screen_updating = True
     wb_destino.app.calculation = 'automatic'
@@ -426,7 +442,6 @@ try:
         print(f"Erro ao copiar o arquivo de volta para a rede: {e}")
 
     print("Manipulações realizadas com sucesso no arquivo local!")
-
 except Exception as e:
     print(f"Erro ao processar a planilha: {e}")
     if 'wb_destino' in locals():

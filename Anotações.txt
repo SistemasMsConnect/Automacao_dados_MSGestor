@@ -33,7 +33,6 @@ Ferramentas
 	- Pandas
 	- openpyxl
 	- OS
-	- talvez (matplotlib)
 
 
 
