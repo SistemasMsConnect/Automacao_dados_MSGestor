@@ -1,12 +1,3 @@
-"""
-** Necessário instalar o selenium
-** Necessário instalar o pandas
-** Necessário instalar o xlwings
-** Necessário instalar o pyopenxl
-** Caso queria criar um executável pode instalar o pyinstaller
-e então executar o pyinstaller nome_da_aplicação
-"""
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from time import sleep
