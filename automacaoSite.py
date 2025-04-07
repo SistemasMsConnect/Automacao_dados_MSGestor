@@ -8,7 +8,6 @@ e então executar o pyinstaller nome_da_aplicação
 """
 
 from selenium import webdriver
-from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from time import sleep
 from selenium.webdriver.common.keys import Keys
@@ -21,8 +20,11 @@ import xlwings as xw
 import shutil
 import tempfile
 import datetime
-import time
 
+
+NOME_ARQUIVO = "arquivo_consolidado.xlsx"
+PADRAO_NOME = "relatorio_msgestor_detalhamento_itens-exportacao"
+NOME_ARQUIVO_DIARIO = "DIARIO IMPUT V.37.xlsb"
 
 chrome_options = Options()
 chrome_options.add_argument("--start-maximized")  # Para abrir o navegador maximizado
@@ -47,7 +49,6 @@ driver = webdriver.Chrome(options=chrome_options)
 
 #função para diminuir o código
 def acao_site(elemento):
-
     #codigo para expandir o campo para buscar data
     campo_expandir = WebDriverWait(driver, 5).until(
         EC.element_to_be_clickable((By.XPATH, elemento))
@@ -75,7 +76,7 @@ def downloadArquivos(xpath, path):
     sleep(1)
 
 # Função para aguardar o término de cada download
-padrao_nome = "relatorio_msgestor_detalhamento_itens-exportacao"
+
 def esperar_download():
     arquivos_antes = set(os.listdir(download_dir))  # Lista antes do download
     while True:
@@ -85,14 +86,13 @@ def esperar_download():
 
         # Verifica se há um novo arquivo e se ele terminou de baixar
         for setArquivo in setNnovos_arquivos:
-            if setArquivo.startswith(padrao_nome) and not setArquivo.endswith(".crdownload"):
+            if setArquivo.startswith(PADRAO_NOME) and not setArquivo.endswith(".crdownload"):
                 print(f"Download concluído: {setArquivo}")
                 return os.path.join(download_dir, setArquivo)
 
-
 #Faz a conexao do python com o site especifico
 try:
-    #localiza a endereço e entrar no site MSGestor
+    #localiza o endereço e entrar no site MSGestor
     driver.get("https://msgestor.msconnect.com.br/pages/auth/login")
     sleep(2)
 
@@ -110,7 +110,6 @@ try:
     sleep(5)
 except Exception as e:
     print(f"Erro durante o login: {e}")
-
 
 try:
     sleep(1)
@@ -191,8 +190,7 @@ try:
 except Exception as e:
     print(f"Erro durante ao preencher campos de datas: {e}")
 
-sleep(2)
-sleep(18)
+sleep(20)
 
 #Utilizando a função para expandir o primeiro painel de download e realizar o download
 try:
@@ -230,7 +228,6 @@ try:
 except Exception as e:
     print(f"Erro ao expandir área de download: {e}")
 
-
 print("Todos os downloads foram concluídos!")
 sleep(3)
 driver.quit()  # Fecha o navegador
@@ -256,14 +253,13 @@ for arquivo in arquivos:
 df_final = pd.concat(lista_dfs, ignore_index=True, join="outer")
 
 
-nome_arquivo = "arquivo_consolidado.xlsx"
 print('')
 caminho = input(r"Insira aqui o caminho para salvar o arquivo consolidado: ")
 print('')
 print('Caminho inserido com sucesso! Por favor aguarde!')
 print('')
 
-caminho_salvar = caminho+"\\"+nome_arquivo
+caminho_salvar = caminho+"\\"+NOME_ARQUIVO
 
 # Salva o DataFrame final em um novo arquivo Excel no caminho especificado
 df_final.to_excel(caminho_salvar, index=False)
@@ -291,11 +287,10 @@ arquivo_unificado = caminho_salvar
 
 # Caminho para o arquivo de destino (o que você vai substituir)
 print('')
-nome_arquivo_diario = "DIARIO IMPUT V.37.xlsb"
 destino_arquivo = input(rf"Digite o caminho do arquivo DIARIO IMPUT: "  )
 print('')
 
-arquivo_destino = destino_arquivo+"\\"+nome_arquivo_diario
+arquivo_destino = destino_arquivo+"\\"+NOME_ARQUIVO_DIARIO
 print('')
 print('Caminho inserido com sucesso! Por favor aguarde!')
 print('')
@@ -400,29 +395,6 @@ try:
     aba_destino.range(f"B3:B{ultima_linha_real}").value = [[v] for v in df_coluna_b]
     print("Passo 1 concluído: Horário removido da coluna B (data_venda)")
     print("Passo 1 concluído: Coluna B formatada")
-
-    # Passo 2: Remover dados de AF4:AS apenas até a última linha real
-    aba_destino.range(f"AF4:AS{ultima_linha_real}").clear_contents()
-    print("Passo 2 concluído: Dados de AF4:AS removidos")
-
-    # Passo 3 e 5: Expandir fórmulas e colar valores em lotes menores
-    formulas = aba_destino.range("AF3:AS3").formula
-    print(f"Fórmulas a serem aplicadas: {formulas}")
-    lote_tamanho = 50000 #em um computador mais potente pode aumentar esse valor (em pc menos potente, diminui esse valor)
-    inicio = 4
-    while inicio <= ultima_linha_real:
-        fim = min(inicio + lote_tamanho - 1, ultima_linha_real)
-        print(f"Aplicando fórmulas em AF{inicio}:AS{fim}")
-        aba_destino.range(f"AF{inicio}:AS{fim}").formula = formulas
-        print(f"Calculando lote AF{inicio}:AS{fim}")
-        wb_destino.app.calculate()
-        valores_calculados = aba_destino.range(f"AF{inicio}:AS{fim}").value
-        aba_destino.range(f"AF{inicio}:AS{fim}").value = valores_calculados
-        print(f"Lote processado: AF{inicio}:AS{fim}")
-        #sleep(0.9)  # Pausa para liberar memória #Computador menos potente descomentar esse linha sleep(0.9)
-        inicio = fim + 1
-    print("Passo 3 e 5 concluídos: Fórmulas expandidas e valores colados")
-
 
     # Reativa atualizações e cálculos
     wb_destino.app.screen_updating = True
